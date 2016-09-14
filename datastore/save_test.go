@@ -15,6 +15,13 @@ func ptrToInt(x int) *int {
 	return &x
 }
 
+type base struct {
+	X int
+	Y string
+	Z []int
+	W *int
+}
+
 func TestStructEncoding(t *testing.T) {
 	testCases := []struct {
 		in      interface{}
@@ -123,6 +130,29 @@ func TestStructEncoding(t *testing.T) {
 			want: []datastore.Property{{
 				Name:  "X",
 				Value: int64(15),
+			}},
+		},
+		{
+			in: struct {
+				base
+				X int
+			}{base: base{X: int(3)}, X: int(15)},
+			want: []datastore.Property{{
+				Name:  "X",
+				Value: int64(15),
+			}},
+		},
+		{
+			in: struct {
+				*base
+				X string
+			}{base: &base{X: int(3), W: ptrToInt(12)}, X: "abc"},
+			want: []datastore.Property{{
+				Name:  "W",
+				Value: int64(12),
+			}, {
+				Name:  "X",
+				Value: "abc",
 			}},
 		},
 	}
